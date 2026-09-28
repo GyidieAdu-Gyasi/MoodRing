@@ -3,19 +3,16 @@
 :root {
   --bg-1: #f8f5ff;
   --bg-2: #fff7d8;
-  --card: rgba(255, 255, 255, 0.8);
+  --card: rgba(255, 255, 255, 0.78);
   --text: #24213a;
   --muted: #77728c;
   --shadow: rgba(73, 54, 110, 0.16);
+  --mood-color: #cbbcff;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   min-height: 100vh;
@@ -23,14 +20,46 @@ body {
   padding: 24px;
   display: grid;
   place-items: center;
+  position: relative;
+  overflow: hidden;
   font-family: 'DM Sans', sans-serif;
-  background: radial-gradient(circle at top left, var(--bg-2) 0, transparent 30%), var(--bg-1);
   color: var(--text);
-  transition: background 0.5s ease;
-  animation: slowFade 1.2s ease-out;
+  background: radial-gradient(circle at top left, var(--bg-2) 0, transparent 32%), var(--bg-1);
+  transition: background 0.6s ease;
+  animation: pageIn 1s ease-out;
+}
+
+/* Ambient floating lights */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  z-index: -2;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(2px);
+  opacity: 0.55;
+  background: radial-gradient(circle, color-mix(in srgb, var(--mood-color) 42%, white) 0%, transparent 68%);
+  transition: background 0.6s ease;
+}
+
+body::before {
+  top: -160px;
+  left: -120px;
+  animation: lightDrift 12s ease-in-out infinite alternate;
+}
+
+body::after {
+  right: -160px;
+  bottom: -180px;
+  animation: lightDrift 15s ease-in-out infinite alternate-reverse;
 }
 
 #app-container {
+  position: relative;
+  isolation: isolate;
   width: min(100%, 700px);
   padding: clamp(28px, 7vw, 64px);
   text-align: center;
@@ -38,8 +67,29 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 32px;
   box-shadow: 0 24px 70px var(--shadow);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
   animation: cardIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Slow decorative rings around the card */
+#app-container::before,
+#app-container::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -24px;
+  border: 1px solid color-mix(in srgb, var(--mood-color) 30%, transparent);
+  border-radius: 52px;
+  pointer-events: none;
+  animation: ringRotate 18s linear infinite;
+}
+
+#app-container::after {
+  inset: -48px;
+  opacity: 0.45;
+  border-style: dashed;
+  animation-duration: 26s;
+  animation-direction: reverse;
 }
 
 .app-header h1 {
@@ -47,41 +97,63 @@ body {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2.5rem, 8vw, 4.8rem);
   letter-spacing: -0.08em;
+  animation: titleGlow 3s ease-in-out infinite;
 }
 
 .eyebrow {
   margin: 0;
+  color: #8067c7;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8067c7;
 }
 
 .intro,
-#mood-description {
-  color: var(--muted);
-}
-
-.intro {
-  margin: 0;
-}
+#mood-description { color: var(--muted); }
+.intro { margin: 0; }
 
 #mood-display {
+  position: relative;
   margin: 42px 0 30px;
   padding: 28px 18px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.72);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  transition: transform 0.35s ease, box-shadow 0.5s ease, background-color 0.6s ease;
 }
+
+/* Expanding light rings on each mood selection */
+#mood-display::before,
+#mood-display::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -14px;
+  border: 2px solid color-mix(in srgb, var(--mood-color) 68%, transparent);
+  border-radius: 34px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#mood-display::after {
+  inset: -30px;
+  border-width: 1px;
+}
+
+#mood-display.ring-active {
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--mood-color) 13%, transparent), 0 0 42px color-mix(in srgb, var(--mood-color) 38%, transparent);
+}
+
+#mood-display.ring-active::before { animation: ringPulse 1.1s ease-out; }
+#mood-display.ring-active::after { animation: ringPulse 1.5s 0.12s ease-out; }
 
 #mood-status {
   margin: 0 0 16px;
+  color: #8d86a5;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #8d86a5;
 }
 
 #mood-icon {
@@ -92,15 +164,15 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
+#mood-icon.mood-bounce { animation: bounce 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
 #mood-message {
   margin: 16px 0 8px;
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.5rem, 4vw, 2.2rem);
 }
 
-#mood-description {
-  margin: 0;
-}
+#mood-description { margin: 0; }
 
 .button-container {
   display: grid;
@@ -129,66 +201,25 @@ body {
 }
 
 .mood-btn.active {
-  border-color: currentColor;
-  box-shadow: 0 8px 18px rgba(73, 54, 110, 0.12);
+  border-color: var(--mood-color);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--mood-color) 45%, transparent);
+  animation: buttonGlow 1.8s ease-in-out infinite;
 }
 
-.mood-pop {
-  animation: popIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cardIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+@keyframes bounce { 0% { transform: scale(0.8); } 35% { transform: scale(1.2); } 70% { transform: scale(0.96); } 100% { transform: scale(1); } }
+@keyframes ringPulse { 0% { opacity: 0.85; transform: scale(0.84); } 100% { opacity: 0; transform: scale(1.18); } }
+@keyframes ringRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes lightDrift { from { transform: translate(0, 0) scale(1); } to { transform: translate(60px, 40px) scale(1.2); } }
+@keyframes titleGlow { 0%, 100% { text-shadow: 0 0 0 transparent; } 50% { text-shadow: 0 0 22px color-mix(in srgb, var(--mood-color) 40%, transparent); } }
+@keyframes buttonGlow { 0%, 100% { box-shadow: 0 0 12px color-mix(in srgb, var(--mood-color) 25%, transparent); } 50% { box-shadow: 0 0 28px color-mix(in srgb, var(--mood-color) 55%, transparent); } }
 
-.mood-bounce {
-  animation: bounce 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@keyframes cardIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slowFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(-3deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(3deg);
-  }
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0.96);
-    opacity: 0.7;
-  }
-  60% {
-    transform: scale(1.03);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes bounce {
-  0% { transform: scale(0.8); }
-  35% { transform: scale(1.2); }
-  70% { transform: scale(0.96); }
-  100% { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
 @media (max-width: 480px) {
-  .button-container {
-    grid-template-columns: 1fr;
-  }
+  .button-container { grid-template-columns: 1fr; }
 }
