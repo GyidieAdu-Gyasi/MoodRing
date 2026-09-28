@@ -37,17 +37,29 @@ const moodDescription = document.getElementById('mood-description');
 const moodIcon = document.getElementById('mood-icon');
 const buttons = document.querySelectorAll('.mood-btn');
 
+function replayAnimation(className) {
+  moodDisplay.classList.remove(className);
+  void moodDisplay.offsetWidth;
+  moodDisplay.classList.add(className);
+}
+
 function changeMood(moodName) {
   const mood = moods[moodName];
 
   if (!mood) return;
 
+  body.style.setProperty('--mood-color', mood.color);
   body.style.background = `radial-gradient(circle at top left, ${mood.color} 0, transparent 38%), #f8f5ff`;
   moodDisplay.style.backgroundColor = `${mood.color}66`;
   moodStatus.textContent = mood.status;
   moodMessage.textContent = mood.message;
   moodDescription.textContent = mood.description;
   moodIcon.textContent = mood.emoji;
+
+  replayAnimation('ring-active');
+  moodIcon.classList.remove('mood-bounce');
+  void moodIcon.offsetWidth;
+  moodIcon.classList.add('mood-bounce');
 
   buttons.forEach(button => {
     button.classList.toggle('active', button.id === moodName);
